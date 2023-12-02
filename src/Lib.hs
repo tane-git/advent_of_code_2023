@@ -1,19 +1,19 @@
 module Lib where
 
 import Control.Applicative ((<|>))
-import Data.Char (isAlpha, isDigit)
-import Data.List (find, foldl, inits, isInfixOf, isPrefixOf, isSuffixOf)
-import Data.Maybe (catMaybes, fromMaybe, listToMaybe, mapMaybe)
+import Data.Char (isDigit)
+import Data.List (find, inits, isPrefixOf)
+import Data.Maybe (fromMaybe, listToMaybe, mapMaybe)
 
-findLastNumber :: String -> Maybe Int
-findLastNumber str = listToMaybe . mapMaybe (checkForNumber . reverse) . inits . reverse $ str
-  where
-    checkForNumber xs
-      | not (null xs) && isDigit (head xs) = Just (read [head xs])
-      | otherwise = findWordNumber xs
-
-findWordNumber :: String -> Maybe Int
-findWordNumber xs = fmap snd . find (\(word, _) -> word `isPrefixOf` xs) $ spelledNumbers
+concatFirstLastNumbers :: String -> Int
+concatFirstLastNumbers str =
+  fromMaybe
+    0
+    ( do
+        firstNum <- findFirstNumber str
+        lastNum <- findLastNumber str
+        return (read $ show firstNum ++ show lastNum)
+    )
 
 findFirstNumber :: String -> Maybe Int
 findFirstNumber str = go str Nothing
@@ -26,18 +26,18 @@ findFirstNumber str = go str Nothing
     findSpelledNumber s = foldr (\(word, num) acc -> if word `isPrefixOf` s then Just num else acc) Nothing spelledNumbers
 
     findDigit c
-      | '0' <= c && c <= '9' = Just $ read [c]
+      | isDigit c = Just $ read [c]
       | otherwise = Nothing
 
-concatFirstLastNumbers :: String -> Int
-concatFirstLastNumbers str =
-  fromMaybe
-    0
-    ( do
-        firstNum <- findFirstNumber str
-        lastNum <- findLastNumber str
-        return (read $ show firstNum ++ show lastNum)
-    )
+findLastNumber :: String -> Maybe Int
+findLastNumber = listToMaybe . mapMaybe (checkForNumber . reverse) . inits . reverse
+  where
+    checkForNumber xs
+      | not (null xs) && isDigit (head xs) = Just (read [head xs])
+      | otherwise = findWordNumber xs
+
+findWordNumber :: String -> Maybe Int
+findWordNumber xs = fmap snd . find (\(word, _) -> word `isPrefixOf` xs) $ spelledNumbers
 
 spelledNumbers :: [(String, Int)]
 spelledNumbers =
