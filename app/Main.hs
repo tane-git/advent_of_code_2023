@@ -1,6 +1,17 @@
-module Main (main) where
+module Main where
 
-import Lib
+import Lib (concatFirstLastNumbers, findFirstNumber, findLastNumber)
 
 main :: IO ()
-main = someFunc
+main = do
+  content <- readFile "input.txt"
+
+  print content
+
+  let linesOfNumbers = map concatFirstLastNumbers (lines content)
+
+  print linesOfNumbers
+
+  let total = sum linesOfNumbers
+
+  print total
