@@ -1,10 +1,25 @@
-module Lib (sumPossibleGamesIds, parseGames, parseGame, parseRound, parseCubes , CubeCount, Game) where
+module Lib (sumPowers, minimumCubesAndPower, sumPossibleGamesIds, parseGames, parseGame, parseRound, parseCubes , CubeCount, Game) where
 
 import Data.List.Split (splitOn)
 import Data.List (find, isInfixOf)
 
 type CubeCount = (Int, Int, Int) -- (Red, Green, Blue)
 type Game = (Int, [CubeCount]) -- (GameID, Rounds)
+
+sumPowers :: String -> Int
+sumPowers content = minimumCubesAndPower $ parseGames content
+
+minimumCubesAndPower :: [Game] -> Int
+minimumCubesAndPower games = sum $ map (power . minCubes) games
+  where
+    minCubes :: Game -> CubeCount
+    minCubes (_, rounds) = foldl1 maxCubes rounds
+
+    maxCubes :: CubeCount -> CubeCount -> CubeCount
+    maxCubes (r1, g1, b1) (r2, g2, b2) = (max r1 r2, max g1 g2, max b1 b2)
+
+    power :: CubeCount -> Int
+    power (r, g, b) = r * g * b
 
 sumPossibleGamesIds :: String -> Int
 sumPossibleGamesIds content =

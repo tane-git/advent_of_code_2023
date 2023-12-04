@@ -1,11 +1,15 @@
 module Main where
 
-import Lib (sumPossibleGamesIds)
+import Lib (sumPossibleGamesIds, sumPowers)
 
 main :: IO ()
 main = do
     content <- readFile "day2-input.txt"
 
-    let games = sumPossibleGamesIds content
+    let sumOfPossibleGamesIds = sumPossibleGamesIds content
 
-    print games
+    print sumOfPossibleGamesIds
+
+    let sumOfPowers = sumPowers content
+
+    print sumOfPowers
