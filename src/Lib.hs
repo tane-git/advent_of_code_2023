@@ -1,9 +1,21 @@
-module Lib ( parseGames, parseGame, parseRound, parseCubes , CubeCount, Game) where
+module Lib (sumPossibleGamesIds, parseGames, parseGame, parseRound, parseCubes , CubeCount, Game) where
 
 import Data.List.Split (splitOn)
+import Data.List (find, isInfixOf)
 
 type CubeCount = (Int, Int, Int) -- (Red, Green, Blue)
 type Game = (Int, [CubeCount]) -- (GameID, Rounds)
+
+sumPossibleGamesIds :: String -> Int
+sumPossibleGamesIds content =
+  let games = parseGames content
+      possibleGames = filter (isGamePossible 12 13 14) games
+   in sum $ map fst possibleGames
+
+isGamePossible :: Int -> Int -> Int -> Game -> Bool
+isGamePossible maxReds maxGreens maxBlues (gameId, rounds) =
+  all (\(reds, greens, blues) -> reds <= maxReds && greens <= maxGreens && blues <= maxBlues) rounds
+
 
 parseGames :: String -> [Game]
 parseGames content = map parseGame $ lines content
@@ -23,9 +35,11 @@ parseRound roundsStr =
 parseCubes :: String -> CubeCount
 parseCubes cubesStr =
   let cubes = splitOn ", " cubesStr
-      parseCube cube = read . head . drop 1 . splitOn " " $ cube
-      reds = sum $ map parseCube $ filter (elem 'r') cubes
-      greens = sum $ map parseCube $ filter (elem 'g') cubes
-      blues = sum $ map parseCube $ filter (elem 'b') cubes
-   in (reds, greens, blues)
-
+      findCount color = 
+        case find (isInfixOf color) cubes of
+          Just cube -> read . head . splitOn " " $ cube
+          Nothing   -> 0
+      reds = findCount "red"
+      greens = findCount "green"
+      blues = findCount "blue"
+  in (reds, greens, blues)

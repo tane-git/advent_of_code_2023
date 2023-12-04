@@ -1,5 +1,4 @@
-import Lib (parseGames, parseGame, parseRound, parseCubes, Game)
-import System.IO (readFile)
+import Lib (sumPossibleGamesIds, parseGames, parseGame, parseRound, parseCubes, Game, CubeCount)
 import Test.HUnit
 import System.Environment (getArgs)
 
@@ -12,16 +11,31 @@ main = do
         ["parseRound"] -> parseRoundTests
         ["parseCubes"] -> parseCubesTests
         _ -> allTests -- default to running all tests
-  runTestTT selectedTests
+  _ <- runTestTT selectedTests
   return ()
 
 allTests :: Test
 allTests = TestList 
-  [ parseGamesTests,
+  [ filterImpossibleGamesTests,
+    parseGamesTests,
     parseGameTests,
     parseRoundTests,
     parseCubesTests
   ]
+
+
+-- filterImpossibleGames
+filterImpossibleGamesTests :: Test
+filterImpossibleGamesTests = TestList
+    [TestLabel "Test for filterImpossibleGamesTests" testFilterImpossibleGames ]
+
+expectedSumOfPossibleGamesIds :: Int
+expectedSumOfPossibleGamesIds = 8
+
+testFilterImpossibleGames :: Test
+testFilterImpossibleGames = TestCase $ do
+  content <- readFile "day2-test-input.txt"
+  sumPossibleGamesIds content @?= expectedSumOfPossibleGamesIds
 
 
 -- parseGames
@@ -35,7 +49,7 @@ expectedGames =
     (2, [(0, 2, 1), (1, 3, 4), (0, 1, 1), (1, 1, 1)]),
     (3, [(20, 8, 6), (4, 13, 5), (1, 5, 0)]),
     (4, [(3, 1, 6), (6, 3, 0), (14, 3, 15)]),
-    (50, [(6, 3, 1), (1, 2, 2)])
+    (5, [(6, 3, 1), (1, 2, 2)])
   ]
 
 testParseGames :: Test
@@ -49,7 +63,9 @@ parseGameTests :: Test
 parseGameTests = TestList 
   [ TestLabel "Test for parseGame" testParseGame ]
 
+inputGame :: String
 inputGame = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+expectedGame :: Game
 expectedGame = (1, [(4, 0, 3), (1, 2, 6), (0, 2, 0)])
 
 testParseGame :: Test
@@ -62,10 +78,13 @@ parseRoundTests :: Test
 parseRoundTests = TestList 
   [ TestLabel "Test for parseRound" testParseRound ]
 
+input :: String
+input = "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
+expected :: [CubeCount]
+expected = [(4, 0, 3), (1, 2, 6), (0, 2, 0)]
+
 testParseRound :: Test
 testParseRound = TestCase $ do
-  let input = "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
-  let expected = [(4, 0, 3), (1, 2, 6), (0, 2, 0)]
   parseRound input @?= expected
 
 
